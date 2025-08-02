@@ -1,5 +1,5 @@
-#ifndef __PROJ_FOUR_CRUMPLE_TREE_HPP
-#define __PROJ_FOUR_CRUMPLE_TREE_HPP
+#ifndef __PROJ_FOUR_WAVL_TREE_HPP
+#define __PROJ_FOUR_WAVL_TREE_HPP
 
 #include <stdexcept>
 #include <string>
@@ -9,27 +9,27 @@
 namespace shindler::ics46::project4 {
 
 template <typename K, typename V>
-class CrumpleTree {
+class WavlTree {
    private:
     // fill in private member data here
     // If you need to declare private functions, do so here too.
 
    public:
-    CrumpleTree();
+    WavlTree();
 
     // In general, a copy constructor and assignment operator
     // are good things to have.
     // For this quarter, I am not requiring these.
-    //	CrumpleTree(const CrumpleTree & st);
-    //	CrumpleTree & operator=(const CrumpleTree & st);
+    //	WavlTree(const WavlTree & st);
+    //	WavlTree & operator=(const WavlTree & st);
     // You do not need to implement these
-    CrumpleTree(const CrumpleTree &) = delete;
-    CrumpleTree(CrumpleTree &&) = delete;
-    CrumpleTree &operator=(const CrumpleTree &) = delete;
-    CrumpleTree &operator=(CrumpleTree &&) = delete;
+    WavlTree(const WavlTree &) = delete;
+    WavlTree(WavlTree &&) = delete;
+    WavlTree &operator=(const WavlTree &) = delete;
+    WavlTree &operator=(WavlTree &&) = delete;
 
     // The destructor is required.
-    ~CrumpleTree();
+    ~WavlTree();
 
     // size() returns the number of distinct keys in the tree.
     [[nodiscard]] size_t size() const noexcept;
@@ -42,13 +42,13 @@ class CrumpleTree {
     //	that has the given key as its key.
     bool contains(const K &key) const noexcept;
 
-    // returns the level on which the node with this key resides.
+    // returns the rank on which the node with this key resides.
     // If !contains(k), this will return a std::nullopt.
-    std::optional<unsigned> level(const K &key) const;
+    std::optional<unsigned> rank(const K &key) const;
 
     // find returns the value associated with the given key
     // If !contains(k), this function will throw a std::runtime_error().
-    // There needs to be a version for const and non-const CrumpleTrees.
+    // There needs to be a version for const and non-const WavlTrees.
     V& find(const K &key);
     const V& find(const K &key) const;
 
@@ -75,75 +75,75 @@ class CrumpleTree {
 };
 
 template <typename K, typename V>
-CrumpleTree<K, V>::CrumpleTree() {
+WavlTree<K, V>::WavlTree() {
     // TODO: Implement this
 }
 
 template <typename K, typename V>
-CrumpleTree<K, V>::~CrumpleTree() {
+WavlTree<K, V>::~WavlTree() {
     // TODO: Implement this
 }
 
 template <typename K, typename V>
-size_t CrumpleTree<K, V>::size() const noexcept {
-    // TODO: Implement this
-    return {};
-}
-
-template <typename K, typename V>
-bool CrumpleTree<K, V>::empty() const noexcept {
+size_t WavlTree<K, V>::size() const noexcept {
     // TODO: Implement this
     return {};
 }
 
 template <typename K, typename V>
-bool CrumpleTree<K, V>::contains(const K &key) const noexcept {
+bool WavlTree<K, V>::empty() const noexcept {
     // TODO: Implement this
     return {};
 }
 
 template <typename K, typename V>
-std::optional<unsigned> CrumpleTree<K, V>::level(const K &key) const {
+bool WavlTree<K, V>::contains(const K &key) const noexcept {
+    // TODO: Implement this
+    return {};
+}
+
+template <typename K, typename V>
+std::optional<unsigned> WavlTree<K, V>::rank(const K &key) const {
     // TODO: Implement this
     return std::nullopt;
 }
 
 template <typename K, typename V>
-V& CrumpleTree<K, V>::find(const K &key) {
+V& WavlTree<K, V>::find(const K &key) {
     // TODO: Implement this
     return std::runtime_error("Key not found.");
 }
 
 template <typename K, typename V>
-const V& CrumpleTree<K, V>::find(const K &key) const {
+const V& WavlTree<K, V>::find(const K &key) const {
     // TODO: Implement this
     return std::runtime_error("Key not found.");
 }
 
 template <typename K, typename V>
-void CrumpleTree<K, V>::insert(const K &key, const V &value) {
+void WavlTree<K, V>::insert(const K &key, const V &value) {
     // TODO: Implement this
 }
 
 template <typename K, typename V>
-void CrumpleTree<K, V>::remove(const K &key) {
+void WavlTree<K, V>::remove(const K &key) {
     // TODO: Implement this
 }
 
 template <typename K, typename V>
-std::vector<K> CrumpleTree<K, V>::inOrder() const {
-    // TODO: Implement this
-    return {};
-}
-
-template <typename K, typename V>
-std::vector<K> CrumpleTree<K, V>::preOrder() const {
+std::vector<K> WavlTree<K, V>::inOrder() const {
     // TODO: Implement this
     return {};
 }
 
 template <typename K, typename V>
-std::vector<K> CrumpleTree<K, V>::postOrder() const {
+std::vector<K> WavlTree<K, V>::preOrder() const {
+    // TODO: Implement this
+    return {};
+}
+
+template <typename K, typename V>
+std::vector<K> WavlTree<K, V>::postOrder() const {
     // TODO: Implement this
     return {};
 }
