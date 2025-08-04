@@ -65,29 +65,5 @@ TEST_CASE("Tree:DoAPostOrder:ExpectCorrectPostorderTraversal",
     REQUIRE(trav == expected);
 }
 
-// TEST_CASE("Tree:RemoveDoesARemove:ExpectElementsNotInTreeAndRanksCorrect",
-//           "[Required][WavlTree][Insert][Erase][Contains][Rank]") {
-//     proj4::WavlTree<int, std::string> tree;
-//     tree.insert(20, "are");
-//     tree.insert(19, "you");
-//     tree.insert(18, "following");
-//     tree.insert(12, "from");
-//     tree.insert(9, "lecture?");
-//     REQUIRE(tree.contains(20));
-//     REQUIRE(tree.contains(19));
-//     REQUIRE(tree.contains(18));
-//     REQUIRE(tree.contains(12));
-//     REQUIRE(tree.contains(9));
-//     tree.remove(9);
-//     tree.remove(18);
-//     // What happens?  12 is now a leaf and must fall.  But 19 is a (2,2) and
-//     // remains at rank 3.
-//     REQUIRE(!tree.contains(9));
-//     REQUIRE(!tree.contains(18));
-//     REQUIRE(tree.rank(20) == 1);
-//     REQUIRE(tree.rank(12) == 1);
-//     REQUIRE(tree.rank(19) == 3);
-// }
-// // NOLINTEND
 
 }  // namespace
