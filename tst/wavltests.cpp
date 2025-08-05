@@ -65,5 +65,54 @@ TEST_CASE("Tree:DoAPostOrder:ExpectCorrectPostorderTraversal",
     REQUIRE(trav == expected);
 }
 
+TEST_CASE("WAVL Tree: Basic Operations", "[wavl][basic]") {
+    proj4::WavlTree<int, std::string> tree;
+
+    SECTION("Empty tree") {
+        REQUIRE(tree.size() == 0);
+    }
+
+    SECTION("Insert single element") {
+        tree.insert(10, "ten");
+        REQUIRE(tree.size() == 1);
+        REQUIRE(tree.contains(10));
+        REQUIRE(tree.find(10) == "ten");
+        REQUIRE(tree.rank(10) == 1);
+    }
+
+    SECTION("Insert multiple elements") {
+        tree.insert(5, "foo");
+        tree.insert(10, "bar");
+        tree.insert(15, "str");
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(10));
+        REQUIRE(tree.contains(15));
+
+        REQUIRE(tree.rank(5) == 1);
+        REQUIRE(tree.rank(10) == 2);
+        REQUIRE(tree.rank(15) == 1);
+    }
+
+    SECTION("Find throws for missing key") {
+        REQUIRE_THROWS_AS(tree.find(999), std::runtime_error);
+    }
+
+    SECTION("Insert and remove elements") {
+        tree.insert(5, "foo");
+        tree.insert(10, "bar");
+        tree.insert(15, "str");
+        tree.remove(10);
+        tree.remove(5);
+
+        REQUIRE(tree.size() == 1);
+        REQUIRE_FALSE(tree.contains(5));
+        REQUIRE_FALSE(tree.contains(10));
+        REQUIRE(tree.contains(15));
+
+        REQUIRE(tree.rank(15) == 1);
+    }
+}
 
 }  // namespace
