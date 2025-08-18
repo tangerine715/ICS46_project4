@@ -364,12 +364,14 @@ void WavlTree<K, V>::restructure(Node* t)
     Node* p = q->parent;
     Node* THE_parent = p->parent;
 
-    bool sameRank = (q->rank == p->rank);
+    bool sameRank = (q->rank == p->rank); //case 1&2 or 3&4
 
     bool qLeft = (p->leftChild == q);
     bool tLeft = (q->leftChild == t);
+    // case 1&3 (left and left) or 2&4 (left and right)
 
     bool pLeft = (THE_parent != nullptr && THE_parent->leftChild == p);
+    //just whether THE parent takes our parent as left or right child
 
     int caseNum = (sameRank ? 0 : 2) + ((qLeft==tLeft) ? 1 : 2);
 
@@ -391,7 +393,7 @@ void WavlTree<K, V>::restructure(Node* t)
 template <typename K, typename V>
 void WavlTree<K, V>::caseOne(Node* t, bool tLeft, bool pLeft)
 {
-    --t->parent->parent->rank;
+    --t->parent->parent->rank; // --p->rank
     q_parent(t, tLeft, pLeft);
 }
 
@@ -399,16 +401,16 @@ template <typename K, typename V>
 void WavlTree<K, V>::caseTwo(Node* t, bool tLeft, bool pLeft)
 {
     ++t->rank;
-    --t->parent->rank;
-    --t->parent->parent->rank;
+    --t->parent->rank; // --q->rank
+    --t->parent->parent->rank; // --p->rank
     t_parent(t, !tLeft, pLeft);
 }
 
 template <typename K, typename V>
 void WavlTree<K, V>::caseThree(Node* t, bool tLeft, bool pLeft)
 {
-    ++t->parent->rank;
-    --t->parent->parent->rank;
+    ++t->parent->rank; // ++q->rank
+    --t->parent->parent->rank; // --p->rank
     q_parent(t, tLeft, pLeft);
 }
 
@@ -416,8 +418,8 @@ template <typename K, typename V>
 void WavlTree<K, V>::caseFour(Node* t, bool tLeft, bool pLeft)
 {
     t->rank += 2;
-    t->parent->parent->rank -= 2;
-    --t->parent->rank;
+    t->parent->parent->rank -= 2; // p->rank -= 2
+    --t->parent->rank; // --q->rank
     t_parent(t, !tLeft, pLeft);
 }
 
@@ -428,19 +430,19 @@ void WavlTree<K, V>::q_parent(Node* t, bool pRight, bool pLeft)
     Node* p = q->parent;
     Node* THE_parent = p->parent;
 
-    if(pRight)
+    if(pRight) //if p ends up on the right
     {
         Node* q_orig_right_child = q->rightChild;
 
         makeRightChild(q, p);
-        makeLeftChild(q->rightChild, q_orig_right_child);
+        makeLeftChild(p, q_orig_right_child);
     }
     else
     {
         Node* q_orig_left_child = q->leftChild;
 
         makeLeftChild(q, p);
-        makeRightChild(q->leftChild, q_orig_left_child);
+        makeRightChild(p, q_orig_left_child);
     }
 
     if(pLeft)
@@ -463,7 +465,7 @@ void WavlTree<K, V>::t_parent(Node* t, bool pRight, bool pLeft)
     Node* t_new_left_child = p;
     Node* t_new_right_child = q;
 
-    if (pRight)
+    if (pRight) // if p ends up on the right
     {
         t_new_left_child = q;
         t_new_right_child = p;
@@ -524,8 +526,6 @@ void WavlTree<K, V>::remove(const K &key) {
                 successor = successor->rightChild;
                 while(!successor->leftChild->isEmpty)
                 {
-                    // std::swap(current->key, current->leftChild->key);
-                    // std::swap(current->value, current->leftChild->value);
                     successor = successor->leftChild;
                 }
                 std::swap(current->key, successor->key);
@@ -557,6 +557,17 @@ void WavlTree<K, V>::remove(const K &key) {
             delete to_delete;
 
             demoteParent(current);
+
+
+            if(!current->isEmpty 
+            && current->leftChild->isEmpty
+            && current->rightChild->isEmpty 
+            && current->rank - current->leftChild->rank == 2
+            && current->rank - current->rightChild->rank == 2)
+            {
+                --current->rank; //...hopefully prevents 2-2
+                demoteParent(current);
+            }
 
             if(current->parent != nullptr 
             && current->parent->leftChild->isEmpty

@@ -43,6 +43,29 @@ TEST_CASE("Tree:QuadInsert:ExpectFindFindTwoHopsAway",
     REQUIRE(tree.size() == 4);
 }
 
+TEST_CASE("Tree:ExpectDeleteOneElementRootEmpty",
+          "[Required][Basic][Remove][Empty]") {
+    proj4::WavlTree<int, std::string> tree;
+    tree.insert(5, "foo");
+    tree.remove(5);
+
+    REQUIRE(tree.empty());
+    REQUIRE(tree.size() == 0);
+}
+
+TEST_CASE("Tree:ExpectDeleteOneElementRootOne",
+          "[Required][Basic][Insert][Contains]") {
+    proj4::WavlTree<int, std::string> tree;
+    tree.insert(5, "foo");
+    tree.insert(3, "eee");
+    tree.remove(5);
+
+    REQUIRE(tree.contains(3));
+    REQUIRE(!tree.contains(5));
+    REQUIRE(tree.rank(3) == 1);
+    REQUIRE(tree.size() == 1);
+}
+
 TEST_CASE("Tree:5Inserts:ExpectSize5", "[Required][Basic][Insert][Size]") {
     proj4::WavlTree<int, std::string> tree;
     tree.insert(5, "foo");
@@ -146,7 +169,7 @@ TEST_CASE("WAVL Tree: Basic Operations", "[wavl][basic]") {
         tree.insert(5, "foo");
         tree.insert(3, "sna");
         tree.insert(10, "bar");
-        tree.insert(4, "eee");
+        tree.insert(2, "eee");
         tree.insert(12, "twelve");
         tree.insert(8, "eight");
         tree.insert(15, "fifteen");
@@ -156,17 +179,98 @@ TEST_CASE("WAVL Tree: Basic Operations", "[wavl][basic]") {
         REQUIRE(tree.contains(5));
         REQUIRE(tree.contains(3));
         REQUIRE(tree.contains(10));
-        REQUIRE(tree.contains(4));
+        REQUIRE(tree.contains(2));
         REQUIRE(tree.contains(12));
         REQUIRE(tree.contains(15));
         REQUIRE(!tree.contains(8));
 
         REQUIRE(tree.rank(5) == 4);
         REQUIRE(tree.rank(3) == 2);
-        REQUIRE(tree.rank(4) == 1);
+        REQUIRE(tree.rank(2) == 1);
         REQUIRE(tree.rank(10) == 1);
         REQUIRE(tree.rank(15) == 1);
         REQUIRE(tree.rank(12) == 3);
+    }
+
+    SECTION("Insert multiple elements below root Case 4 top right bottom left") {
+        tree.insert(5, "foo");
+        tree.insert(3, "sna");
+        tree.insert(10, "bar");
+        tree.insert(2, "eee");
+        tree.insert(12, "twelve");
+        tree.insert(8, "eight");
+        tree.insert(9, "fifteen");
+        tree.remove(12);
+
+        REQUIRE(tree.size() == 6);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(3));
+        REQUIRE(tree.contains(10));
+        REQUIRE(tree.contains(2));
+        REQUIRE(tree.contains(9));
+        REQUIRE(tree.contains(8));
+        REQUIRE(!tree.contains(12));
+
+        REQUIRE(tree.rank(5) == 4);
+        REQUIRE(tree.rank(3) == 2);
+        REQUIRE(tree.rank(2) == 1);
+        REQUIRE(tree.rank(10) == 1);
+        REQUIRE(tree.rank(9) == 3);
+        REQUIRE(tree.rank(8) == 1);
+    }
+
+    SECTION("Insert multiple elements below root Case 4 top left bottom right") {
+        tree.insert(5, "foo");
+        tree.insert(4, "sna");
+        tree.insert(10, "bar");
+        tree.insert(1, "eee");
+        tree.insert(2, "eee");
+        tree.insert(8, "twelve");
+        tree.insert(3, "eight");
+        tree.remove(1);
+
+        REQUIRE(tree.size() == 6);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(4));
+        REQUIRE(tree.contains(10));
+        REQUIRE(tree.contains(2));
+        REQUIRE(tree.contains(3));
+        REQUIRE(tree.contains(8));
+        REQUIRE(!tree.contains(1));
+
+        REQUIRE(tree.rank(5) == 4);
+        REQUIRE(tree.rank(4) == 1);
+        REQUIRE(tree.rank(10) == 2);
+        REQUIRE(tree.rank(2) == 1);
+        REQUIRE(tree.rank(3) == 3);
+        REQUIRE(tree.rank(8) == 1);
+    }
+
+    SECTION("Delete root large case") {
+        tree.insert(5, "foo");
+        tree.insert(4, "sna");
+        tree.insert(10, "bar");
+        tree.insert(1, "eee");
+        tree.insert(2, "eee");
+        tree.insert(8, "twelve");
+        tree.insert(3, "eight");
+        tree.remove(5);
+
+        REQUIRE(tree.size() == 6);
+        REQUIRE(tree.contains(1));
+        REQUIRE(tree.contains(4));
+        REQUIRE(tree.contains(10));
+        REQUIRE(tree.contains(2));
+        REQUIRE(tree.contains(3));
+        REQUIRE(tree.contains(8));
+        REQUIRE(!tree.contains(5));
+
+        REQUIRE(tree.rank(4) == 4);
+        REQUIRE(tree.rank(1) == 1);
+        REQUIRE(tree.rank(10) == 1);
+        REQUIRE(tree.rank(2) == 2);
+        REQUIRE(tree.rank(3) == 1);
+        REQUIRE(tree.rank(8) == 2);
     }
 
     SECTION("Insert multiple elements below root Case 1 both right") {
