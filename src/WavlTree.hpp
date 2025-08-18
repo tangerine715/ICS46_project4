@@ -72,9 +72,7 @@ class WavlTree {
     // you may do as you please (no test cases in
     // the grading script will deal with this situation)
     void insert(const K &key, const V &value);
-
     void promote(Node* q);
-
     void restructure(Node* t);
 
     void caseOne(Node* t, bool tLeft, bool pLeft);
@@ -89,13 +87,16 @@ class WavlTree {
     void makeRightChild(Node* parent, Node* rightChild);
     void makeLeftChild(Node* parent, Node* leftChild);
 
+    bool isTwoTwoNode(Node* curr);
+    bool isTwoTwoNodeLegal(Node* curr);
+
     // Deletes the given key from the tree
     // and performs the balancing operation(s) if needed.
     // If the key does not exist in the tree,
     // do not modify the tree.
     void remove(const K &key);
-
-    void demoteParent(Node* t);
+    void remove_node(Node* q);
+    void demoteParent(Node* q);
 
     // The following three functions all return
     // the set of keys in the tree as a standard vector.
@@ -268,45 +269,25 @@ const V& WavlTree<K, V>::find(const K &key) const {
 
 template <typename K, typename V>
 void WavlTree<K, V>::insert(const K &key, const V &value) {
-    Node* current = root;
-    // std::cout << "just entered insert, about to put in " << key << std::endl;
+    Node* q = root;
     
-    
-    while (!current->isEmpty) 
+    while (!q->isEmpty) 
     {
-        if (current->key == key) 
+        if (q->key == key) 
         {
             return;
         }
-        current = (key<current->key) ? current->leftChild : current->rightChild;
+        q = (key<q->key) ? q->leftChild : q->rightChild;
     } 
-    //so current is empty, we can insert here
-    current->key = key;
-    current->value = value;
-    current->isEmpty = false;
-    current->leftChild = new Node{K{}, V{}, nullptr, nullptr, current, true, 0};
-    current->rightChild = new Node{K{}, V{}, nullptr, nullptr, current, true, 0};
+    //so q is empty, we can insert here
+    q->key = key;
+    q->value = value;
+    q->isEmpty = false;
+    q->leftChild = new Node{K{}, V{}, nullptr, nullptr, q, true, 0};
+    q->rightChild = new Node{K{}, V{}, nullptr, nullptr, q, true, 0};
 
     //alright, now i need to promote.
-    // std::cout << "got to promote" << std::endl;
-    promote(current);
-    Node* printed = root;
-    while(printed!=nullptr)
-    {
-        // std::cout << "curr node is " << printed->key << std::endl;
-        printed = printed->leftChild;
-    }
-    printed = root;
-    // std::cout << "back to root!" << std::endl;
-    while(printed!=nullptr)
-    {
-        // std::cout << "curr node is " << printed->key << std::endl;
-        printed = printed->rightChild;
-    }
-
-    printed = root;
-    // std::cout << "back to root!" << std::endl;
-    
+    promote(q);
 }
 
 template <typename K, typename V>
@@ -435,6 +416,17 @@ void WavlTree<K, V>::q_parent(Node* t, bool pRight, bool pLeft)
     {
         makeRightChild(THE_parent, q);
     }
+
+    if(isTwoTwoNode(q->leftChild))
+    {
+        --q->leftChild->rank;
+        demoteParent(q->leftChild);
+    }
+    if(isTwoTwoNode(q->rightChild))
+    {
+        --q->rightChild->rank;
+        demoteParent(q->rightChild);
+    }
 }
 
 template <typename K, typename V>
@@ -467,6 +459,17 @@ void WavlTree<K, V>::t_parent(Node* t, bool pRight, bool pLeft)
     {
         makeRightChild(THE_parent, t);
     }
+
+    if(isTwoTwoNode(t->leftChild))
+    {
+        --t->leftChild->rank;
+        demoteParent(t->leftChild);
+    }
+    if(isTwoTwoNode(t->rightChild))
+    {
+        --t->rightChild->rank;
+        demoteParent(t->rightChild);
+    }
 }
 
 
@@ -494,70 +497,85 @@ void WavlTree<K, V>::makeLeftChild(Node* parent, Node* leftChild)
     parent->leftChild = leftChild;
 }
 
+
 template <typename K, typename V>
-void WavlTree<K, V>::remove(const K &key) {
-    Node* current = root;
-    while (current != nullptr && !current->isEmpty) 
+bool WavlTree<K, V>::isTwoTwoNode(Node* curr)
+{
+    return (curr != nullptr && !curr->isEmpty
+                && curr->leftChild->isEmpty && curr->rightChild->isEmpty
+                && curr->rank - curr->leftChild->rank == 2 
+                && curr->rank - curr->rightChild->rank == 2);
+}
+
+template <typename K, typename V>
+bool WavlTree<K, V>::isTwoTwoNodeLegal(Node* curr)
+{
+    return (curr != nullptr && !curr->isEmpty
+                && curr->rank - curr->leftChild->rank == 2 
+                && curr->rank - curr->rightChild->rank == 2);
+}
+
+template <typename K, typename V>
+void WavlTree<K, V>::remove_node(Node* q) {
+    //UNLEASH EXCHANGE PROTOCOL ;(
+    if (!q->leftChild->isEmpty && !q->rightChild->isEmpty)
     {
-        if (current->key == key) 
+        Node* successor = q;
+        successor = successor->rightChild;
+        while(!successor->leftChild->isEmpty)
         {
-            //UNLEASH EXCHANGE PROTOCOL ;(
-            if (!current->leftChild->isEmpty && !current->rightChild->isEmpty)
-            {
-                Node* successor = current;
-                successor = successor->rightChild;
-                while(!successor->leftChild->isEmpty)
-                {
-                    successor = successor->leftChild;
-                }
-                std::swap(current->key, successor->key);
-                std::swap(current->value, successor->value);
-                current = successor;
-            }
-
-            Node* to_delete = current;
-            if(current->rightChild->isEmpty)
-            {
-                delete current->rightChild;
-                current = current->leftChild;
-            }
-            else 
-            {
-                delete current->leftChild;
-                current = current->rightChild;
-            }
-
-            if (to_delete->parent != nullptr && to_delete == to_delete->parent->leftChild)
-            {
-                makeLeftChild(to_delete->parent, current);
-            }
-            else 
-            {
-                makeRightChild(to_delete->parent, current);
-            }
-
-            delete to_delete;
-
-            demoteParent(current);
-
-            if(current->parent != nullptr 
-            && current->parent->leftChild->isEmpty
-            && current->parent->rightChild->isEmpty 
-            && current->parent->rank - current->parent->leftChild->rank == 2
-            && current->parent->rank - current->parent->rightChild->rank == 2)
-            {
-                --current->parent->rank; //...hopefully prevents 2-2
-                demoteParent(current->parent);
-            }
-            
-            //ALL RIGHT, two cases
-            //a) somehow right child was empty by default, i delete that
-            //b) for all other cases, left is empty, i delete that
-
+            successor = successor->leftChild;
         }
-        current = (key<current->key) ? current->leftChild : current->rightChild;
+        std::swap(q->key, successor->key);
+        std::swap(q->value, successor->value);
+        q = successor;
     }
 
+    Node* u = q;
+    if(u->rightChild->isEmpty)
+    {
+        delete u->rightChild; // v
+        q = q->leftChild; //q
+    }
+    else 
+    {
+        delete q->leftChild; // v
+        q = q->rightChild; // q
+    }
+
+    Node* p = u->parent;
+    if (p != nullptr && u == p->leftChild) 
+    {
+        makeLeftChild(p, q);
+    }
+    else 
+    {
+        makeRightChild(p, q);
+    }
+
+    delete u;
+
+    demoteParent(q);
+
+    if(isTwoTwoNode(q->parent))
+    {
+        --q->parent->rank; //...hopefully prevents 2-2
+        demoteParent(q->parent);
+    }
+}
+
+template <typename K, typename V>
+void WavlTree<K, V>::remove(const K &key) {
+    Node* q = root;
+    while (q != nullptr && !q->isEmpty) 
+    {
+        if (q->key == key) 
+        {
+            remove_node(q);
+            break;
+        }
+        q = (key < q->key) ? q->leftChild : q->rightChild;
+    }
 }
 
 template <typename K, typename V>
@@ -583,27 +601,16 @@ void WavlTree<K, V>::demoteParent(Node* q)
         }
         case 1:
         {
-            if(s->leftChild!=nullptr && s->rightChild!=nullptr
-                && s->leftChild->isEmpty && s->rightChild->isEmpty
-                && s->rank - s->leftChild->rank == 2 
-                && s->rank - s->rightChild->rank == 2)
-                {
-                    --p->rank;
-                    --s->rank;
-                    demoteParent(p);
-                }
+            if(isTwoTwoNodeLegal(s))
+            {
+                --p->rank;
+                --s->rank;
+                demoteParent(p);
+            }
             else 
             {
-                Node* nearestChild = nullptr;
-                if(s->rightChild->isEmpty || s->leftChild->isEmpty)
-                {   
-                    nearestChild = (s->rightChild->isEmpty) ? s->leftChild : s->rightChild;
-                }  
-                else 
-                {
-                    nearestChild = (s->leftChild->rank>s->rightChild->rank) ? s->leftChild : s->rightChild;
-                } 
-                restructure(nearestChild);
+                Node* t = (s->leftChild->rank > s->rightChild->rank) ? s->leftChild : s->rightChild;
+                restructure(t); //t is the nearest child of s
             }
         }
     }

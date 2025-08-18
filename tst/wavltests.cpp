@@ -192,6 +192,60 @@ TEST_CASE("WAVL Tree: Basic Operations", "[wavl][basic]") {
         REQUIRE(tree.rank(12) == 3);
     }
 
+    SECTION("Insert multiple elements at root with kids Case 3 both left") {
+        tree.insert(20, "foo");
+        tree.insert(10, "sna");
+        tree.insert(30, "bar");
+        tree.insert(5, "eee");
+        tree.insert(28, "twelve");
+        tree.insert(15, "eight");
+        tree.insert(3, "fifteen");
+        tree.remove(30);
+
+        REQUIRE(tree.size() == 6);
+        REQUIRE(tree.contains(20));
+        REQUIRE(tree.contains(28));
+        REQUIRE(tree.contains(10));
+        REQUIRE(tree.contains(15));
+        REQUIRE(tree.contains(3));
+        REQUIRE(tree.contains(5));
+        REQUIRE(!tree.contains(30));
+
+        REQUIRE(tree.rank(10) == 4);
+        REQUIRE(tree.rank(20) == 3);
+        REQUIRE(tree.rank(5) == 2);
+        REQUIRE(tree.rank(3) == 1);
+        REQUIRE(tree.rank(15) == 1);
+        REQUIRE(tree.rank(28) == 1);
+    }
+
+    SECTION("Insert multiple elements at root with kids Case 3 both left, char version") {
+        tree.insert('t', "foo");
+        tree.insert('j', "sna");
+        tree.insert('z', "bar");
+        tree.insert('e', "eee");
+        tree.insert('x', "twelve");
+        tree.insert('o', "eight");
+        tree.insert('c', "fifteen");
+        tree.remove('z');
+
+        REQUIRE(tree.size() == 6);
+        REQUIRE(tree.contains('t'));
+        REQUIRE(tree.contains('x'));
+        REQUIRE(tree.contains('j'));
+        REQUIRE(tree.contains('o'));
+        REQUIRE(tree.contains('c'));
+        REQUIRE(tree.contains('e'));
+        REQUIRE(!tree.contains('z'));
+
+        REQUIRE(tree.rank('j') == 4);
+        REQUIRE(tree.rank('t') == 3);
+        REQUIRE(tree.rank('e') == 2);
+        REQUIRE(tree.rank('c') == 1);
+        REQUIRE(tree.rank('o') == 1);
+        REQUIRE(tree.rank('x') == 1);
+    }
+
     SECTION("Insert multiple elements below root Case 4 top right bottom left") {
         tree.insert(5, "foo");
         tree.insert(3, "sna");
@@ -344,6 +398,7 @@ TEST_CASE("WAVL Tree: Basic Operations", "[wavl][basic]") {
         REQUIRE(tree.rank(12) == 3);
         REQUIRE(tree.rank(5) == 2);
     }
+
 
 
     SECTION("Insert multiple elements Case 1 both left") {
