@@ -612,15 +612,16 @@ void WavlTree<K, V>::demoteParent(Node* q)
                 }
             else 
             {
-                //...what is t?
-                if(!s->rightChild->isEmpty)
+                Node* nearestChild = nullptr;
+                if(s->rightChild->isEmpty || s->leftChild->isEmpty)
+                {   
+                    nearestChild = (s->rightChild->isEmpty) ? s->leftChild : s->rightChild;
+                }  
+                else 
                 {
-                    restructure(s->rightChild);
-                }
-                else  //i think left can't be empty here
-                {
-                    restructure(s->leftChild);
-                }
+                    nearestChild = (s->leftChild->rank>s->rightChild->rank) ? s->leftChild : s->rightChild;
+                } 
+                restructure(nearestChild)
             }
         }
     }
