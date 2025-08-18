@@ -636,8 +636,8 @@ void WavlTree<K, V>::preOrderHelper(Node* curr, std::vector<K>& vec) const
         return;
     }
     vec.push_back(curr->key);
-    inOrderHelper(curr->leftChild, vec);
-    inOrderHelper(curr->rightChild, vec);
+    preOrderHelper(curr->leftChild, vec);
+    preOrderHelper(curr->rightChild, vec);
 }
 
 template <typename K, typename V>
@@ -654,8 +654,8 @@ void WavlTree<K, V>::postOrderHelper(Node* curr, std::vector<K>& vec) const
     {
         return;
     }
-    inOrderHelper(curr->leftChild, vec);
-    inOrderHelper(curr->rightChild, vec);
+    postOrderHelper(curr->leftChild, vec);
+    postOrderHelper(curr->rightChild, vec);
     vec.push_back(curr->key);
 }
 
