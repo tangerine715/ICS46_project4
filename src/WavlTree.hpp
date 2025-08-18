@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <iostream>
 
 namespace shindler::ics46::project4 {
 
@@ -105,16 +106,21 @@ class WavlTree {
 
 template <typename K, typename V>
 WavlTree<K, V>::WavlTree() : root(new Node{K{}, V{}, nullptr, nullptr, nullptr, true, 0}) {
+    std::cout << "got to constructor" << std::endl;
     
 }
 
 template <typename K, typename V>
 WavlTree<K, V>::~WavlTree() {
+    std::cout << "got to destructor" << std::endl;
+
     auto leftmost = [](Node* n) 
     {
-        while (!n->leftChild->isEmpty) { n = n->leftChild; }
+        while (n!=nullptr && !n->isEmpty && !n->leftChild->isEmpty) { n = n->leftChild; }
         return n;
     };
+
+    Node* to_delete = nullptr;
 
     Node* curr = leftmost(root);
     while(curr != nullptr && !curr->isEmpty)
@@ -125,7 +131,8 @@ WavlTree<K, V>::~WavlTree() {
         }
         else //right child is empty, end of postorder going
         {
-            Node *to_delete = curr;
+            delete to_delete;
+            to_delete = curr;
             while (curr->parent!= nullptr && (curr->parent->rightChild == curr || 
             curr->parent->rightChild->isEmpty)) //while im a non-root and (a right child, or left child's parent with no right child), go up to parent and add it
             {
@@ -135,21 +142,47 @@ WavlTree<K, V>::~WavlTree() {
             }
             //rn im either a left child of a parent with a right child or the root
             curr = curr->parent;
-            delete to_delete;
         }
     }
+    std::cout << "got out of des" << std::endl;
 }
 
 template <typename K, typename V>
 size_t WavlTree<K, V>::size() const noexcept {
-    Node* curr = root;
+    //essentially preorder
+    unsigned int size = 0;
 
-    while (curr != nullptr && !curr->isEmpty) 
+    Node *t = root;
+
+    while(t != nullptr && !t->isEmpty)
     {
-        curr = curr->leftChild;
+        ++size;
+        if(!t->leftChild->isEmpty) 
+        { 
+            t = t->leftChild; 
+        }
+        else if (!t->rightChild->isEmpty) 
+        {
+            t = t->rightChild;
+        }
+        else //im at a leaf node, so i need to go back up to the next unseen right child
+        {  
+            while(t->parent != nullptr && (t->parent->rightChild == t
+            || t->parent->rightChild->isEmpty))
+            {
+                t = t->parent;
+            }
+            if(t->parent != nullptr)
+            {
+                t = t->parent->rightChild;
+            }
+            else 
+            {
+                t = t->parent;
+            }
+        }
     }
-
-    return {};
+    return size;
 }
 
 template <typename K, typename V>
@@ -216,19 +249,17 @@ const V& WavlTree<K, V>::find(const K &key) const {
 template <typename K, typename V>
 void WavlTree<K, V>::insert(const K &key, const V &value) {
     Node* current = root;
-    while (current != nullptr && !current->isEmpty) 
+    std::cout << "just entered insert, about to put in " << key << std::endl;
+    
+    
+    while (!current->isEmpty) 
     {
         if (current->key == key) 
         {
-            return current->value;
+            return;
         }
         current = (key<current->key) ? current->leftChild : current->rightChild;
     } 
-    //now current should be an empty node. 
-    if (current == nullptr)
-    {
-        throw std::string("ya goofed up");
-    }
     //so current is empty, we can insert here
     current->key = key;
     current->value = value;
@@ -237,13 +268,44 @@ void WavlTree<K, V>::insert(const K &key, const V &value) {
     current->rightChild = new Node{K{}, V{}, nullptr, nullptr, current, true, 0};
 
     //alright, now i need to promote.
+    std::cout << "got to promote" << std::endl;
     promote(current);
+    Node* printed = root;
+    while(printed!=nullptr)
+    {
+        std::cout << "curr node is " << printed->key << std::endl;
+        printed = printed->leftChild;
+    }
+    printed = root;
+    std::cout << "back to root!" << std::endl;
+    while(printed!=nullptr)
+    {
+        std::cout << "curr node is " << printed->key << std::endl;
+        printed = printed->rightChild;
+    }
+
+    printed = root;
+    std::cout << "back to root!" << std::endl;
+    if(!printed->isEmpty)
+    {
+        if(!printed->leftChild->isEmpty && !printed->leftChild->rightChild->isEmpty)
+        {
+            std::cout << "right of left is " << current->key << std::endl;
+        }
+    }
+    
 }
 
 template <typename K, typename V>
 bool WavlTree<K, V>::promote(Node* q) {
     ++q->rank;
-    Node* p = q->parent;
+    std::cout << "node " << q->key << " is rank " << q->rank << std::endl;
+    
+    Node* p = q->parent; //nullpointer at first one
+    if (p == nullptr)
+    {
+        return true;
+    }
     Node* s = (q == p->leftChild) ? p->rightChild : p->leftChild;
     if (p == nullptr || q->rank != p->rank)
     {
@@ -257,6 +319,8 @@ bool WavlTree<K, V>::promote(Node* q) {
         {
             if (!promote(p))
             {
+                std::cout << "im restructuring?!" << std::endl;
+                std::cout << "its from node " << q->key << std::endl;
                 restructure(q);
             };
             return true;
@@ -266,6 +330,7 @@ bool WavlTree<K, V>::promote(Node* q) {
             return false;
         }
     }
+    return false; //i should NEVER get here
     
 }
 
@@ -279,11 +344,13 @@ void WavlTree<K, V>::restructure(Node* t)
     Node* THE_parent = p->parent;
 
     bool sameRank = (q->rank == p->rank);
+
     bool qLeft = (p->leftChild == q);
     bool tLeft = (q->leftChild == t);
+
     bool pLeft = (THE_parent != nullptr && THE_parent->leftChild == p);
 
-    int caseNum = (sameRank ? 0 : 2) + (qLeft ? 1 : 2);
+    int caseNum = (sameRank ? 0 : 2) + ((qLeft==tLeft) ? 1 : 2);
 
     switch (caseNum) 
     {
@@ -291,6 +358,11 @@ void WavlTree<K, V>::restructure(Node* t)
         case 2: caseTwo(t, tLeft, pLeft); break;
         case 3: caseThree(t, tLeft, pLeft); break;
         case 4: caseFour(t, tLeft, pLeft); break;
+    }
+
+    while (root->parent!=nullptr) //surely this wont cause problems...
+    {
+        root = root->parent;
     }
 }
 
@@ -396,24 +468,23 @@ void WavlTree<K, V>::t_parent(Node* t, bool pRight, bool pLeft)
 template <typename K, typename V>
 void WavlTree<K, V>::makeRightChild(Node* parent, Node* rightChild)
 {
+    rightChild->parent = parent;
     if(parent == nullptr)
     {
         return;
     }
     parent->rightChild = rightChild;
-    rightChild->parent = parent;
-    //i lose connection to original parent and original right child
 }
 
 template <typename K, typename V>
 void WavlTree<K, V>::makeLeftChild(Node* parent, Node* leftChild)
 {
+    leftChild->parent = parent;
     if(parent == nullptr)
     {
         return;
     }
     parent->leftChild = leftChild;
-    leftChild->parent = parent;
 }
 
 template <typename K, typename V>
@@ -458,7 +529,19 @@ void WavlTree<K, V>::remove(const K &key) {
                 makeRightChild(to_delete->parent, current);
             }
 
+            delete to_delete;
+
             demoteParent(current);
+
+            if(current->parent != nullptr 
+            && current->parent->leftChild->isEmpty
+            && current->parent->rightChild->isEmpty 
+            && current->parent->rank - current->parent->leftChild->rank == 2
+            && current->parent->rank - current->parent->rightChild->rank == 2)
+            {
+                --current->parent->rank; //...hopefully prevents 2-2
+                demoteParent(current->parent);
+            }
             
             //ALL RIGHT, two cases
             //a) somehow right child was empty by default, i delete that
@@ -478,7 +561,7 @@ void WavlTree<K, V>::demoteParent(Node* q)
         return;
     }
     //now i know parent is not null and rank difference is 3 (prob...)
-    assert(p->rank - q->rank == 3);
+    // assert(p->rank - q->rank == 3);
 
     Node* s = (p->leftChild == q) ? p->rightChild : p->leftChild;
     unsigned int rankDiff = p->rank - s->rank;
@@ -521,6 +604,10 @@ std::vector<K> WavlTree<K, V>::inOrder() const {
     std::vector<K> inOrder{};
 
     Node *t = root;
+    if(t->isEmpty)
+    {
+        return inOrder;
+    }
     while(!t->leftChild->isEmpty)
     {
         t = t->leftChild;
@@ -573,10 +660,13 @@ std::vector<K> WavlTree<K, V>::preOrder() const {
             {
                 t = t->parent;
             }
-            t = t->parent;
-            if(t != nullptr && !t->rightChild->isEmpty)
+            if(t->parent != nullptr)
             {
-                t = t->rightChild;
+                t = t->parent->rightChild;
+            }
+            else 
+            {
+                t = t->parent;
             }
         }
     }

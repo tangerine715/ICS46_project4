@@ -19,7 +19,6 @@ TEST_CASE("Tree:SimpleInsertAndFind:ExpectSingleInsertFound",
           "[Required][Basic][Insert][Contains]") {
     proj4::WavlTree<int, std::string> tree;
     tree.insert(5, "foo");
-
     REQUIRE(tree.contains(5));
 }
 
@@ -41,6 +40,7 @@ TEST_CASE("Tree:QuadInsert:ExpectFindFindTwoHopsAway",
     tree.insert(12, "twelve");
 
     REQUIRE(tree.contains(12));
+    REQUIRE(tree.size() == 4);
 }
 
 TEST_CASE("Tree:5Inserts:ExpectSize5", "[Required][Basic][Insert][Size]") {
@@ -52,6 +52,11 @@ TEST_CASE("Tree:5Inserts:ExpectSize5", "[Required][Basic][Insert][Size]") {
     tree.insert(15, "fifteen");
 
     REQUIRE(tree.size() == 5);
+}
+
+TEST_CASE("Tree:ExpectFindThrowsInEmpty", "[Required][Basic][Find]") {
+    const proj4::WavlTree<int, std::string> tree;
+    REQUIRE_THROWS_AS(tree.find(999), std::runtime_error);
 }
 
 TEST_CASE("Tree:DoAPostOrder:ExpectCorrectPostorderTraversal",
