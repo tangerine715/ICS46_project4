@@ -106,7 +106,7 @@ TEST_CASE("WAVL Tree: Basic Operations", "[wavl][basic]") {
         REQUIRE(tree.rank(10) == 1);
     }
 
-    SECTION("Insert multiple elements") {
+    SECTION("Insert multiple elements Case 1 both right") {
         tree.insert(5, "foo");
         tree.insert(10, "bar");
         tree.insert(15, "str");
@@ -119,6 +119,123 @@ TEST_CASE("WAVL Tree: Basic Operations", "[wavl][basic]") {
         REQUIRE(tree.rank(5) == 1);
         REQUIRE(tree.rank(10) == 2);
         REQUIRE(tree.rank(15) == 1);
+    }
+
+    SECTION("Insert multiple elements Case 1 both left") {
+        tree.insert(5, "foo");
+        tree.insert(3, "bar");
+        tree.insert(1, "str");
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(3));
+        REQUIRE(tree.contains(1));
+
+        REQUIRE(tree.rank(5) == 1);
+        REQUIRE(tree.rank(3) == 2);
+        REQUIRE(tree.rank(1) == 1);
+    }
+
+    SECTION("Insert multiple elements Case 2 top right bottom left") {
+        tree.insert(5, "foo");
+        tree.insert(10, "bar");
+        tree.insert(7, "str");
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(10));
+        REQUIRE(tree.contains(7));
+
+        REQUIRE(tree.rank(5) == 1);
+        REQUIRE(tree.rank(7) == 2);
+        REQUIRE(tree.rank(10) == 1);
+    }
+
+    SECTION("Insert multiple elements Case 2 top left bottom right") {
+        tree.insert(5, "foo");
+        tree.insert(1, "bar");
+        tree.insert(3, "str");
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(1));
+        REQUIRE(tree.contains(3));
+
+        REQUIRE(tree.rank(5) == 1);
+        REQUIRE(tree.rank(3) == 2);
+        REQUIRE(tree.rank(1) == 1);
+    }
+
+    SECTION("Insert multiple elements Case 3 both right") {
+        tree.insert(5, "foo");
+        tree.insert(3, "bar");
+        tree.insert(12, "str");
+        tree.insert(15, "zzz");
+        tree.remove(3);
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(12));
+        REQUIRE(tree.contains(15));
+        REQUIRE(!tree.contains(3));
+
+        REQUIRE(tree.rank(5) == 1); //bruh, demoted bcuz 2-2 node...
+        REQUIRE(tree.rank(12) == 3);
+        REQUIRE(tree.rank(15) == 1);
+    }
+
+    SECTION("Insert multiple elements Case 3 both left") {
+        tree.insert(5, "foo");
+        tree.insert(3, "bar");
+        tree.insert(12, "str");
+        tree.insert(1, "zzz");
+        tree.remove(12);
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(3));
+        REQUIRE(tree.contains(1));
+        REQUIRE(!tree.contains(12));
+
+        REQUIRE(tree.rank(5) == 1); //once again, 2-2 node demoted ;-;
+        REQUIRE(tree.rank(3) == 3);
+        REQUIRE(tree.rank(1) == 1);
+    }
+
+    SECTION("Insert multiple elements Case 4 top right bottom left") {
+        tree.insert(5, "foo");
+        tree.insert(3, "bar");
+        tree.insert(12, "str");
+        tree.insert(10, "zzz");
+        tree.remove(3);
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(12));
+        REQUIRE(tree.contains(10));
+        REQUIRE(!tree.contains(3));
+
+        REQUIRE(tree.rank(5) == 1);
+        REQUIRE(tree.rank(10) == 3);
+        REQUIRE(tree.rank(12) == 1);
+    }
+
+    SECTION("Insert multiple elements Case 4 top left bottom right") {
+        tree.insert(5, "foo");
+        tree.insert(3, "bar");
+        tree.insert(12, "str");
+        tree.insert(4, "zzz");
+        tree.remove(12);
+
+        REQUIRE(tree.size() == 3);
+        REQUIRE(tree.contains(5));
+        REQUIRE(tree.contains(3));
+        REQUIRE(tree.contains(4));
+        REQUIRE(!tree.contains(12));
+
+        REQUIRE(tree.rank(5) == 1);
+        REQUIRE(tree.rank(4) == 3);
+        REQUIRE(tree.rank(3) == 1);
     }
 
     SECTION("Find throws for missing key") {

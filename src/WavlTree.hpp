@@ -563,6 +563,7 @@ void WavlTree<K, V>::remove(const K &key) {
         }
         current = (key<current->key) ? current->leftChild : current->rightChild;
     }
+
 }
 
 template <typename K, typename V>
@@ -599,6 +600,10 @@ void WavlTree<K, V>::demoteParent(Node* q)
                 }
             else 
             {
+                if(q->rightChild == nullptr || q->leftChild == nullptr)
+                {
+                    q = s;
+                } //...this is so gross
                 if(!q->rightChild->isEmpty)
                 {
                     restructure(q->rightChild);
