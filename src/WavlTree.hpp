@@ -73,7 +73,7 @@ class WavlTree {
     // the grading script will deal with this situation)
     void insert(const K &key, const V &value);
 
-    bool promote(Node* q);
+    void promote(Node* q);
 
     void restructure(Node* t);
 
@@ -310,49 +310,31 @@ void WavlTree<K, V>::insert(const K &key, const V &value) {
 }
 
 template <typename K, typename V>
-bool WavlTree<K, V>::promote(Node* q) {
+void WavlTree<K, V>::promote(Node* q) {
     ++q->rank;
     // std::cout << "node " << q->key << " is rank " << q->rank << std::endl;
     
     Node* p = q->parent; //nullpointer at first one
-    if (p == nullptr)
-    {
-        return true;
-    }
-    Node* s = (q == p->leftChild) ? p->rightChild : p->leftChild;
     if (p == nullptr || q->rank != p->rank)
     {
-        return true;
+        return;
     }
+    Node* s = (q == p->leftChild) ? p->rightChild : p->leftChild;
 
     int rankDifference = p->rank - s->rank;
     switch (rankDifference) 
     {
         case 1:
         {
-            if (!promote(p))
-            {
-                // std::cout << "im restructuring?!" << std::endl;
-                // std::cout << "its from node " << q->key << std::endl;
-                Node* s = (q == p->leftChild ? p->rightChild : p->leftChild);
-                if(!s->isEmpty && s->rank > q->rank)
-                {
-                    restructure(s);
-                }
-                else 
-                {
-                    restructure(q);
-                }
-            };
-            return true;
+            promote(p);
+            break;
         }
         case 2:
         {
-            return false;
+            Node* t = (q->leftChild->rank > q->rightChild->rank ? q->leftChild : q->rightChild);
+            restructure(t); //t is closest child of q
         }
-    }
-    return false; //i should NEVER get here
-    
+    }    
 }
 
 template <typename K, typename V>
@@ -557,17 +539,6 @@ void WavlTree<K, V>::remove(const K &key) {
             delete to_delete;
 
             demoteParent(current);
-
-
-            if(!current->isEmpty 
-            && current->leftChild->isEmpty
-            && current->rightChild->isEmpty 
-            && current->rank - current->leftChild->rank == 2
-            && current->rank - current->rightChild->rank == 2)
-            {
-                --current->rank; //...hopefully prevents 2-2
-                demoteParent(current);
-            }
 
             if(current->parent != nullptr 
             && current->parent->leftChild->isEmpty
