@@ -492,6 +492,7 @@ void WavlTree<K, V>::makeRightChild(Node* parent, Node* rightChild)
     rightChild->parent = parent;
     if(parent == nullptr)
     {
+        root = rightChild;
         return;
     }
     parent->rightChild = rightChild;
@@ -503,6 +504,7 @@ void WavlTree<K, V>::makeLeftChild(Node* parent, Node* leftChild)
     leftChild->parent = parent;
     if(parent == nullptr)
     {
+        root = leftChild;
         return;
     }
     parent->leftChild = leftChild;
@@ -610,6 +612,7 @@ void WavlTree<K, V>::demoteParent(Node* q)
                 }
             else 
             {
+                //...what is t?
                 if(!s->rightChild->isEmpty)
                 {
                     restructure(s->rightChild);
