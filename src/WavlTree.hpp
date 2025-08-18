@@ -45,6 +45,7 @@ class WavlTree {
 
     // size() returns the number of distinct keys in the tree.
     [[nodiscard]] size_t size() const noexcept;
+    [[nodiscard]] size_t sizeHelper(Node* curr) const noexcept;
 
     // isEmpty() returns true if and only if the tree has no values in it.
     [[nodiscard]] bool empty() const noexcept;
@@ -159,39 +160,49 @@ WavlTree<K, V>::~WavlTree() {
 template <typename K, typename V>
 size_t WavlTree<K, V>::size() const noexcept {
     //essentially preorder
-    unsigned int size = 0;
+    return sizeHelper(root);
+    // unsigned int size = 0;
 
-    Node *t = root;
+    // Node *t = root;
 
-    while(t != nullptr && !t->isEmpty)
+    // while(t != nullptr && !t->isEmpty)
+    // {
+    //     ++size;
+    //     if(!t->leftChild->isEmpty) 
+    //     { 
+    //         t = t->leftChild; 
+    //     }
+    //     else if (!t->rightChild->isEmpty) 
+    //     {
+    //         t = t->rightChild;
+    //     }
+    //     else //im at a leaf node, so i need to go back up to the next unseen right child
+    //     {  
+    //         while(t->parent != nullptr && (t->parent->rightChild == t
+    //         || t->parent->rightChild->isEmpty))
+    //         {
+    //             t = t->parent;
+    //         }
+    //         if(t->parent != nullptr)
+    //         {
+    //             t = t->parent->rightChild;
+    //         }
+    //         else 
+    //         {
+    //             t = t->parent;
+    //         }
+    //     }
+    // }
+    // return size;
+}
+
+template <typename K, typename V>
+size_t WavlTree<K, V>::sizeHelper(Node* curr) const noexcept {
+    if(curr->isEmpty)
     {
-        ++size;
-        if(!t->leftChild->isEmpty) 
-        { 
-            t = t->leftChild; 
-        }
-        else if (!t->rightChild->isEmpty) 
-        {
-            t = t->rightChild;
-        }
-        else //im at a leaf node, so i need to go back up to the next unseen right child
-        {  
-            while(t->parent != nullptr && (t->parent->rightChild == t
-            || t->parent->rightChild->isEmpty))
-            {
-                t = t->parent;
-            }
-            if(t->parent != nullptr)
-            {
-                t = t->parent->rightChild;
-            }
-            else 
-            {
-                t = t->parent;
-            }
-        }
+        return 0;
     }
-    return size;
+    return 1 + sizeHelper(curr->leftChild) + sizeHelper(curr->rightChild);
 }
 
 template <typename K, typename V>
