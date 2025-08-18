@@ -102,11 +102,14 @@ class WavlTree {
     [[nodiscard]] std::vector<K> inOrder() const;
     [[nodiscard]] std::vector<K> preOrder() const;
     [[nodiscard]] std::vector<K> postOrder() const;
+
+    void inOrderHelper(Node* curr, std::vector<K>& vec) const;
+    void preOrderHelper(Node* curr, std::vector<K>& vec) const;
+    void postOrderHelper(Node* curr, std::vector<K>& vec) const;
 };
 
 template <typename K, typename V>
 WavlTree<K, V>::WavlTree() : root(new Node{K{}, V{}, nullptr, nullptr, nullptr, true, 0}) {
-    std::cout << "got to constructor" << std::endl;
     
 }
 
@@ -602,108 +605,58 @@ void WavlTree<K, V>::demoteParent(Node* q)
 template <typename K, typename V>
 std::vector<K> WavlTree<K, V>::inOrder() const {
     std::vector<K> inOrder{};
-
-    Node *t = root;
-    if(t->isEmpty)
-    {
-        return inOrder;
-    }
-    while(!t->leftChild->isEmpty)
-    {
-        t = t->leftChild;
-    }
-
-    while(!t->isEmpty)
-    {
-        inOrder.push_back(t->key);
-        if(!t->rightChild->isEmpty) 
-        { 
-            t = t->rightChild; 
-            while(!t->leftChild->isEmpty)
-            {
-                t = t->leftChild;
-            }
-        }
-        else 
-        {
-            while(t->parent != nullptr && (t->parent->rightChild == t || t->parent->rightChild->isEmpty))
-            {
-                t = t->parent;
-            }
-            t = t->parent;
-        }
-    }
+    inOrderHelper(root, inOrder);
     return inOrder;
+}
+
+template <typename K, typename V>
+void WavlTree<K, V>::inOrderHelper(Node* curr, std::vector<K>& vec) const 
+{
+    if(curr->isEmpty)
+    {
+        return;
+    }
+    inOrderHelper(curr->leftChild, vec);
+    vec.push_back(curr->key);
+    inOrderHelper(curr->rightChild, vec);
 }
 
 template <typename K, typename V>
 std::vector<K> WavlTree<K, V>::preOrder() const {
     std::vector<K> preOrder{};
-
-    Node *t = root;
-
-    while(t != nullptr && !t->isEmpty)
-    {
-        preOrder.push_back(t->key);
-        if(!t->leftChild->isEmpty) 
-        { 
-            t = t->leftChild; 
-        }
-        else if (!t->rightChild->isEmpty) 
-        {
-            t = t->rightChild;
-        }
-        else //im at a leaf node, so i need to go back up to the next unseen right child
-        {  
-            while(t->parent != nullptr && (t->parent->rightChild == t
-            || t->parent->rightChild->isEmpty))
-            {
-                t = t->parent;
-            }
-            if(t->parent != nullptr)
-            {
-                t = t->parent->rightChild;
-            }
-            else 
-            {
-                t = t->parent;
-            }
-        }
-    }
+    preOrderHelper(root, preOrder);
     return preOrder;
+}
+
+template <typename K, typename V>
+void WavlTree<K, V>::preOrderHelper(Node* curr, std::vector<K>& vec) const 
+{
+    if(curr->isEmpty)
+    {
+        return;
+    }
+    vec.push_back(curr->key);
+    inOrderHelper(curr->leftChild, vec);
+    inOrderHelper(curr->rightChild, vec);
 }
 
 template <typename K, typename V>
 std::vector<K> WavlTree<K, V>::postOrder() const {
     std::vector<K> postOrder{};
-
-    auto leftmost = [](Node* n) 
-    {
-        while (!n->leftChild->isEmpty) { n = n->leftChild; }
-        return n;
-    };
-
-    Node* curr = leftmost(root);
-    while(curr != nullptr && !curr->isEmpty)
-    {
-        if(!curr->rightChild->isEmpty) 
-        { 
-            curr = leftmost(curr->rightChild); 
-        }
-        else //right child is empty, end of postorder going
-        {
-            postOrder.push_back(curr->key);
-            while (curr->parent!= nullptr && (curr->parent->rightChild == curr || 
-            curr->parent->rightChild->isEmpty)) //while im a non-root and (a right child, or left child's parent with no right child), go up to parent and add it
-            {
-                curr = curr->parent;
-                postOrder.push_back(curr->key);
-            }
-            //rn im either a left child of a parent with a right child or the root
-            curr = curr->parent;
-        }
-    }
+    postOrderHelper(root, postOrder);
     return postOrder;
+}
+
+template <typename K, typename V>
+void WavlTree<K, V>::postOrderHelper(Node* curr, std::vector<K>& vec) const 
+{
+    if(curr->isEmpty)
+    {
+        return;
+    }
+    inOrderHelper(curr->leftChild, vec);
+    inOrderHelper(curr->rightChild, vec);
+    vec.push_back(curr->key);
 }
 
 }  // namespace shindler::ics46::project4

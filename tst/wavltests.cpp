@@ -58,6 +58,27 @@ TEST_CASE("Tree:ExpectFindThrowsInEmpty", "[Required][Basic][Find]") {
     const proj4::WavlTree<int, std::string> tree;
     REQUIRE_THROWS_AS(tree.find(999), std::runtime_error);
 }
+TEST_CASE("Tree:DoAPreOrder:ExpectCorrectPreorderTraversal",
+          "[Required][Basic][Insert][PreOrder]") {
+    proj4::WavlTree<int, std::string> tree;
+    tree.insert(5, "foo");
+    tree.insert(3, "sna");
+    tree.insert(10, "bar");
+    auto trav = tree.preOrder();
+    static const std::vector<int> expected = {5, 3, 10};
+    REQUIRE(trav == expected);
+}
+
+TEST_CASE("Tree:DoAPostOrder:ExpectCorrectInorderTraversal",
+          "[Required][Basic][Insert][InOrder]") {
+    proj4::WavlTree<int, std::string> tree;
+    tree.insert(5, "foo");
+    tree.insert(3, "sna");
+    tree.insert(10, "bar");
+    auto trav = tree.postOrder();
+    static const std::vector<int> expected = {3, 10, 5};
+    REQUIRE(trav == expected);
+}
 
 TEST_CASE("Tree:DoAPostOrder:ExpectCorrectPostorderTraversal",
           "[Required][Basic][Insert][PostOrder]") {
