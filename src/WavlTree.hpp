@@ -334,7 +334,15 @@ bool WavlTree<K, V>::promote(Node* q) {
             {
                 // std::cout << "im restructuring?!" << std::endl;
                 // std::cout << "its from node " << q->key << std::endl;
-                restructure(q);
+                Node* s = (q == p->leftChild ? p->rightChild : p->leftChild);
+                if(!s->isEmpty && s->rank > q->rank)
+                {
+                    restructure(s);
+                }
+                else 
+                {
+                    restructure(q);
+                }
             };
             return true;
         }
