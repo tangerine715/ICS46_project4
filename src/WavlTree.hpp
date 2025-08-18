@@ -115,20 +115,19 @@ WavlTree<K, V>::WavlTree() : root(new Node{K{}, V{}, nullptr, nullptr, nullptr, 
 
 template <typename K, typename V>
 WavlTree<K, V>::~WavlTree() {
-    std::cout << "got to destructor" << std::endl;
 
     auto leftmost = [](Node* n) 
     {
-        while (n!=nullptr && !n->isEmpty && !n->leftChild->isEmpty) { n = n->leftChild; }
+        while (n!=nullptr && n->leftChild!=nullptr) { n = n->leftChild; }
         return n;
     };
 
     Node* to_delete = nullptr;
 
     Node* curr = leftmost(root);
-    while(curr != nullptr && !curr->isEmpty)
+    while(curr != nullptr)
     {
-        if(!curr->rightChild->isEmpty) 
+        if(curr->rightChild!=nullptr) 
         { 
             curr = leftmost(curr->rightChild); 
         }
@@ -137,17 +136,24 @@ WavlTree<K, V>::~WavlTree() {
             delete to_delete;
             to_delete = curr;
             while (curr->parent!= nullptr && (curr->parent->rightChild == curr || 
-            curr->parent->rightChild->isEmpty)) //while im a non-root and (a right child, or left child's parent with no right child), go up to parent and add it
+            curr->parent->rightChild==nullptr)) //while im a non-root and (a right child, or left child's parent with no right child), go up to parent and add it
             {
                 curr = curr->parent;
                 delete to_delete;
                 to_delete = curr;
             }
             //rn im either a left child of a parent with a right child or the root
-            curr = curr->parent;
+            if(curr->parent == nullptr)
+            {
+                delete curr;
+                curr = nullptr;
+            }
+            else 
+            {
+                curr = curr->parent;
+            }
         }
     }
-    std::cout << "got out of des" << std::endl;
 }
 
 template <typename K, typename V>
@@ -252,7 +258,7 @@ const V& WavlTree<K, V>::find(const K &key) const {
 template <typename K, typename V>
 void WavlTree<K, V>::insert(const K &key, const V &value) {
     Node* current = root;
-    std::cout << "just entered insert, about to put in " << key << std::endl;
+    // std::cout << "just entered insert, about to put in " << key << std::endl;
     
     
     while (!current->isEmpty) 
@@ -271,7 +277,7 @@ void WavlTree<K, V>::insert(const K &key, const V &value) {
     current->rightChild = new Node{K{}, V{}, nullptr, nullptr, current, true, 0};
 
     //alright, now i need to promote.
-    std::cout << "got to promote" << std::endl;
+    // std::cout << "got to promote" << std::endl;
     promote(current);
     Node* printed = root;
     while(printed!=nullptr)
@@ -288,21 +294,14 @@ void WavlTree<K, V>::insert(const K &key, const V &value) {
     }
 
     printed = root;
-    std::cout << "back to root!" << std::endl;
-    if(!printed->isEmpty)
-    {
-        if(!printed->leftChild->isEmpty && !printed->leftChild->rightChild->isEmpty)
-        {
-            std::cout << "right of left is " << current->key << std::endl;
-        }
-    }
+    // std::cout << "back to root!" << std::endl;
     
 }
 
 template <typename K, typename V>
 bool WavlTree<K, V>::promote(Node* q) {
     ++q->rank;
-    std::cout << "node " << q->key << " is rank " << q->rank << std::endl;
+    // std::cout << "node " << q->key << " is rank " << q->rank << std::endl;
     
     Node* p = q->parent; //nullpointer at first one
     if (p == nullptr)
@@ -322,8 +321,8 @@ bool WavlTree<K, V>::promote(Node* q) {
         {
             if (!promote(p))
             {
-                std::cout << "im restructuring?!" << std::endl;
-                std::cout << "its from node " << q->key << std::endl;
+                // std::cout << "im restructuring?!" << std::endl;
+                // std::cout << "its from node " << q->key << std::endl;
                 restructure(q);
             };
             return true;
