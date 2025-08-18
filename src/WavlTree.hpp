@@ -293,14 +293,14 @@ void WavlTree<K, V>::insert(const K &key, const V &value) {
     Node* printed = root;
     while(printed!=nullptr)
     {
-        std::cout << "curr node is " << printed->key << std::endl;
+        // std::cout << "curr node is " << printed->key << std::endl;
         printed = printed->leftChild;
     }
     printed = root;
-    std::cout << "back to root!" << std::endl;
+    // std::cout << "back to root!" << std::endl;
     while(printed!=nullptr)
     {
-        std::cout << "curr node is " << printed->key << std::endl;
+        // std::cout << "curr node is " << printed->key << std::endl;
         printed = printed->rightChild;
     }
 
@@ -600,17 +600,13 @@ void WavlTree<K, V>::demoteParent(Node* q)
                 }
             else 
             {
-                if(q->rightChild == nullptr || q->leftChild == nullptr)
+                if(!s->rightChild->isEmpty)
                 {
-                    q = s;
-                } //...this is so gross
-                if(!q->rightChild->isEmpty)
-                {
-                    restructure(q->rightChild);
+                    restructure(s->rightChild);
                 }
                 else  //i think left can't be empty here
                 {
-                    restructure(q->leftChild);
+                    restructure(s->leftChild);
                 }
             }
         }
