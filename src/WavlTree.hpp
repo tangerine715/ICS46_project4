@@ -518,15 +518,17 @@ void WavlTree<K, V>::remove(const K &key) {
             //UNLEASH EXCHANGE PROTOCOL ;(
             if (!current->leftChild->isEmpty && !current->rightChild->isEmpty)
             {
-                std::swap(current->key, current->rightChild->key);
-                std::swap(current->value, current->rightChild->value);
-                current = current->rightChild;
-                while(!current->leftChild->isEmpty)
+                Node* successor = current;
+                successor = successor->rightChild;
+                while(!successor->leftChild->isEmpty)
                 {
-                    std::swap(current->key, current->leftChild->key);
-                    std::swap(current->value, current->leftChild->value);
-                    current = current->leftChild;
+                    // std::swap(current->key, current->leftChild->key);
+                    // std::swap(current->value, current->leftChild->value);
+                    successor = successor->leftChild;
                 }
+                std::swap(current->key, successor->key);
+                std::swap(current->value, successor->value);
+                current = successor;
             }
 
             Node* to_delete = current;
