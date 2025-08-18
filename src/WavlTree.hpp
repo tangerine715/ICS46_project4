@@ -621,7 +621,7 @@ void WavlTree<K, V>::demoteParent(Node* q)
                 {
                     nearestChild = (s->leftChild->rank>s->rightChild->rank) ? s->leftChild : s->rightChild;
                 } 
-                restructure(nearestChild)
+                restructure(nearestChild);
             }
         }
     }
