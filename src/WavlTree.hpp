@@ -87,8 +87,8 @@ class WavlTree {
     void makeRightChild(Node* parent, Node* rightChild);
     void makeLeftChild(Node* parent, Node* leftChild);
 
+    bool isTwoTwoNodeIllegal(Node* curr);
     bool isTwoTwoNode(Node* curr);
-    bool isTwoTwoNodeLegal(Node* curr);
 
     // Deletes the given key from the tree
     // and performs the balancing operation(s) if needed.
@@ -117,6 +117,8 @@ WavlTree<K, V>::WavlTree() : root(new Node{K{}, V{}, nullptr, nullptr, nullptr, 
 
 template <typename K, typename V>
 WavlTree<K, V>::~WavlTree() {
+
+    //essentially postorder
 
     auto leftmost = [](Node* n) 
     {
@@ -160,10 +162,12 @@ WavlTree<K, V>::~WavlTree() {
 
 template <typename K, typename V>
 size_t WavlTree<K, V>::size() const noexcept {
-    //essentially preorder
-    return sizeHelper(root);
-    // unsigned int size = 0;
 
+    return sizeHelper(root);
+
+    //essentially preorder, this works too
+
+    // unsigned int size = 0;
     // Node *t = root;
 
     // while(t != nullptr && !t->isEmpty)
@@ -345,11 +349,6 @@ void WavlTree<K, V>::restructure(Node* t)
         case 3: caseThree(t, tLeft, pLeft); break;
         case 4: caseFour(t, tLeft, pLeft); break;
     }
-
-    while (root->parent!=nullptr) //surely this wont cause problems...
-    {
-        root = root->parent;
-    }
 }
 
 
@@ -417,12 +416,12 @@ void WavlTree<K, V>::q_parent(Node* t, bool pRight, bool pLeft)
         makeRightChild(THE_parent, q);
     }
 
-    if(isTwoTwoNode(q->leftChild))
+    if(isTwoTwoNodeIllegal(q->leftChild))
     {
         --q->leftChild->rank;
         demoteParent(q->leftChild);
     }
-    if(isTwoTwoNode(q->rightChild))
+    if(isTwoTwoNodeIllegal(q->rightChild))
     {
         --q->rightChild->rank;
         demoteParent(q->rightChild);
@@ -460,12 +459,12 @@ void WavlTree<K, V>::t_parent(Node* t, bool pRight, bool pLeft)
         makeRightChild(THE_parent, t);
     }
 
-    if(isTwoTwoNode(t->leftChild))
+    if(isTwoTwoNodeIllegal(t->leftChild))
     {
         --t->leftChild->rank;
         demoteParent(t->leftChild);
     }
-    if(isTwoTwoNode(t->rightChild))
+    if(isTwoTwoNodeIllegal(t->rightChild))
     {
         --t->rightChild->rank;
         demoteParent(t->rightChild);
@@ -499,7 +498,7 @@ void WavlTree<K, V>::makeLeftChild(Node* parent, Node* leftChild)
 
 
 template <typename K, typename V>
-bool WavlTree<K, V>::isTwoTwoNode(Node* curr)
+bool WavlTree<K, V>::isTwoTwoNodeIllegal(Node* curr)
 {
     return (curr != nullptr && !curr->isEmpty
                 && curr->leftChild->isEmpty && curr->rightChild->isEmpty
@@ -508,7 +507,7 @@ bool WavlTree<K, V>::isTwoTwoNode(Node* curr)
 }
 
 template <typename K, typename V>
-bool WavlTree<K, V>::isTwoTwoNodeLegal(Node* curr)
+bool WavlTree<K, V>::isTwoTwoNode(Node* curr)
 {
     return (curr != nullptr && !curr->isEmpty
                 && curr->rank - curr->leftChild->rank == 2 
@@ -531,6 +530,7 @@ void WavlTree<K, V>::remove_node(Node* q) {
         q = successor;
     }
 
+    //deleting v
     Node* u = q;
     if(u->rightChild->isEmpty)
     {
@@ -543,6 +543,7 @@ void WavlTree<K, V>::remove_node(Node* q) {
         q = q->rightChild; // q
     }
 
+    //connecting p and q
     Node* p = u->parent;
     if (p != nullptr && u == p->leftChild) 
     {
@@ -553,11 +554,14 @@ void WavlTree<K, V>::remove_node(Node* q) {
         makeRightChild(p, q);
     }
 
+    //deleting u
     delete u;
 
+    //demoting q's parent
     demoteParent(q);
 
-    if(isTwoTwoNode(q->parent))
+    //check for potential illegal 2-2 node
+    if(isTwoTwoNodeIllegal(q->parent))
     {
         --q->parent->rank; //...hopefully prevents 2-2
         demoteParent(q->parent);
@@ -587,7 +591,6 @@ void WavlTree<K, V>::demoteParent(Node* q)
         return;
     }
     //now i know parent is not null and rank difference is 3 (prob...)
-    // assert(p->rank - q->rank == 3);
 
     Node* s = (p->leftChild == q) ? p->rightChild : p->leftChild;
     unsigned int rankDiff = p->rank - s->rank;
@@ -601,7 +604,7 @@ void WavlTree<K, V>::demoteParent(Node* q)
         }
         case 1:
         {
-            if(isTwoTwoNodeLegal(s))
+            if(isTwoTwoNode(s))
             {
                 --p->rank;
                 --s->rank;
